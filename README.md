@@ -27,6 +27,12 @@
 /Users/rick/登录态/x_cookies.json
 ```
 
+登录窗口会使用本机 Google Chrome，并把专用浏览器 profile 保存在：
+
+```text
+/Users/rick/登录态/x_chrome_profile
+```
+
 之后手动更新数据：
 
 ```bash

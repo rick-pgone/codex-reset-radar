@@ -19,6 +19,7 @@ from twikit import Client
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_COOKIE_FILE = Path("/Users/rick/登录态/x_cookies.json")
+DEFAULT_CHROME_PROFILE = Path("/Users/rick/登录态/x_chrome_profile")
 DEFAULT_OUTPUT = ROOT / "data" / "latest.json"
 TZ = ZoneInfo("Asia/Shanghai")
 
@@ -81,18 +82,24 @@ def has_x_session(cookies: list[dict]) -> bool:
     return bool(values.get("auth_token") and values.get("ct0"))
 
 
-async def refresh_x_cookies(cookie_file: Path, timeout_sec: int) -> None:
+async def refresh_x_cookies(cookie_file: Path, chrome_profile_dir: Path, timeout_sec: int) -> None:
     cookie_file.parent.mkdir(parents=True, exist_ok=True)
+    chrome_profile_dir.mkdir(parents=True, exist_ok=True)
     async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=False, args=["--start-maximized"])
-        context = await browser.new_context(no_viewport=True)
+        context = await p.chromium.launch_persistent_context(
+            user_data_dir=str(chrome_profile_dir),
+            channel="chrome",
+            headless=False,
+            no_viewport=True,
+            args=["--start-maximized"],
+        )
         cookies = load_playwright_cookies(cookie_file)
         if cookies:
             await context.add_cookies(cookies)
 
         page = await context.new_page()
         await page.goto("https://x.com/thsottiaux", wait_until="domcontentloaded", timeout=60000)
-        print("Complete X login in the opened browser window if needed.")
+        print("Complete X login in the opened local Google Chrome window if needed.")
 
         deadline = time.time() + timeout_sec
         while time.time() < deadline:
@@ -103,11 +110,11 @@ async def refresh_x_cookies(cookie_file: Path, timeout_sec: int) -> None:
                     encoding="utf-8",
                 )
                 os.chmod(cookie_file, 0o600)
-                await browser.close()
+                await context.close()
                 return
             await page.wait_for_timeout(1500)
 
-        await browser.close()
+        await context.close()
         raise TimeoutError("Timed out waiting for X login cookies.")
 
 
@@ -367,6 +374,7 @@ async def fetch_records(cookie_file: Path, hours: int, count: int) -> list[dict]
 async def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--cookie-file", type=Path, default=DEFAULT_COOKIE_FILE)
+    parser.add_argument("--chrome-profile-dir", type=Path, default=DEFAULT_CHROME_PROFILE)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--hours", type=int, default=24 * 7)
     parser.add_argument("--count", type=int, default=40)
@@ -377,7 +385,11 @@ async def main() -> None:
     args = parser.parse_args()
 
     if args.refresh_login:
-        await refresh_x_cookies(args.cookie_file.expanduser(), args.login_timeout_sec)
+        await refresh_x_cookies(
+            args.cookie_file.expanduser(),
+            args.chrome_profile_dir.expanduser(),
+            args.login_timeout_sec,
+        )
 
     records = SEED_RECORDS if args.seed_only else await fetch_records(args.cookie_file.expanduser(), args.hours, args.count)
     payload = build_payload(records, args.cadence_hours)
