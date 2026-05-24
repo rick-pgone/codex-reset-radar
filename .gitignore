@@ -3,6 +3,8 @@ dist/
 *.log
 .DS_Store
 node_modules/
+__pycache__/
+*.pyc
 
 # Never commit local browser sessions or private credentials.
 *_cookies.json
