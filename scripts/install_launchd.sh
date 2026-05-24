@@ -23,10 +23,7 @@ cat > "$PLIST" <<PLIST
 
   <key>ProgramArguments</key>
   <array>
-    <string>$PYTHON_BIN</string>
-    <string>$ROOT_DIR/scripts/update_reset_radar.py</string>
-    <string>--cadence-hours</string>
-    <string>12</string>
+    <string>$ROOT_DIR/scripts/run_scheduled_update.sh</string>
   </array>
 
   <key>StartInterval</key>

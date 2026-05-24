@@ -7,6 +7,7 @@
 - `codex-reset-radar.html`：前端页面。
 - `data/latest.json`：前端读取的数据源。
 - `scripts/update_reset_radar.py`：从 X 拉取信息、筛选、打标签，并更新 `data/latest.json`。
+- `scripts/run_scheduled_update.sh`：执行一次完整更新：采集 JSON、打包、部署到 Cloudflare Pages。
 - `scripts/install_launchd.sh`：在 macOS 上安装每 12 小时执行一次的本地定时任务。
 - `scripts/package_site.sh`：把线上需要的文件打包到 `dist/`。
 
@@ -53,6 +54,13 @@ http://127.0.0.1:8787/codex-reset-radar.html
 ```bash
 ./scripts/install_launchd.sh
 ```
+
+这个定时任务会：
+
+1. 本地抓取 X 数据。
+2. 更新 `data/latest.json`。
+3. 打包 `dist/`。
+4. 部署到 Cloudflare Pages。
 
 查看日志：
 
@@ -106,15 +114,11 @@ launchctl unload ~/Library/LaunchAgents/com.rick.codex-reset-radar.plist
 
 ## 自动发布数据
 
-如果你希望本地每 12 小时更新后自动上线，可以让脚本更新 JSON 后执行：
+当前默认每 12 小时自动部署到 Cloudflare Pages。如果你还希望把最新 JSON 同步提交到 GitHub，可以在 launchd 环境里设置：
 
 ```bash
-git add data/latest.json
-git commit -m "Update reset radar data"
-git push
+PUSH_TO_GIT=1
 ```
-
-当前目录还不是 git 仓库。等你确定 GitHub 仓库地址后，再把自动提交/推送加进定时任务。
 
 ## 可选：真正的 VPS 方案
 
