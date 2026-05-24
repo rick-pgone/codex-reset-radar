@@ -1,0 +1,126 @@
+{
+  "generated_at": "2026-05-24T17:02:31+08:00",
+  "cadence_hours": 12,
+  "latest": {
+    "tag": "confirmed",
+    "source_type": "official",
+    "date_short": {
+      "zh": "5 月 24 日",
+      "en": "May 24"
+    },
+    "full_time": {
+      "zh": "2026 年 5 月 24 日 · 04:14 · UTC+8",
+      "en": "May 24, 2026 · 04:14 · UTC+8"
+    },
+    "conclusion": {
+      "zh": "已重置额度",
+      "en": "Usage limits reset"
+    },
+    "summary": {
+      "zh": "官方已确认修复，并重置所有账号的使用额度；当前不是预测信号，而是已发生的重置事件。",
+      "en": "Official fix confirmed, with usage limits reset for all accounts. This is not a forecast signal; it is a completed reset event."
+    },
+    "source_title": {
+      "zh": "推特来源 · Tibo",
+      "en": "Tweet source · Tibo"
+    },
+    "url": "https://x.com/thsottiaux/status/2058280452851638313",
+    "tweet_html": {
+      "zh": "Some of you noticed limits drained faster in Codex, we root caused it to an optimization that we rolled back that had an impact on cache hit rates when compacting across long running sessions.<br><br>We fixed this and have now <strong>reset usage limits</strong> for all accounts. Enjoy the weekend.",
+      "en": "Some of you noticed limits drained faster in Codex, we root caused it to an optimization that we rolled back that had an impact on cache hit rates when compacting across long running sessions.<br><br>We fixed this and have now <strong>reset usage limits</strong> for all accounts. Enjoy the weekend."
+    }
+  },
+  "analysis": {
+    "confidence": "confirmed",
+    "text": {
+      "zh": "系统会优先关注官方确认、官方回复和用户集中反馈。最强模式通常是 Codex 额度异常消耗、使用额度不同步，或官方承认正在调查/已修复。",
+      "en": "The monitor prioritizes official confirmations, official replies, and clustered user complaints. The strongest pattern is abnormal Codex limit drain, out-of-sync limits, or official acknowledgement of investigation/fix."
+    },
+    "metrics": [
+      {
+        "title": {
+          "zh": "触发原因",
+          "en": "Trigger"
+        },
+        "text": {
+          "zh": "用户集中反馈 Codex limit/reset 异常。",
+          "en": "Clustered user reports around Codex limit/reset anomalies."
+        }
+      },
+      {
+        "title": {
+          "zh": "官方回应",
+          "en": "Official response"
+        },
+        "text": {
+          "zh": "优先追踪 Tibo 与 Sama 的推文和回复。",
+          "en": "Prioritizes posts and replies from Tibo and Sama."
+        }
+      },
+      {
+        "title": {
+          "zh": "结果",
+          "en": "Outcome"
+        },
+        "text": {
+          "zh": "根据措辞标记为确信、高危或玩笑。",
+          "en": "Labels each signal as confirmed, high-risk, or joke based on wording."
+        }
+      }
+    ]
+  },
+  "evidence": [
+    {
+      "tag": "confirmed",
+      "time": "04:14",
+      "date": {
+        "zh": "5 月 24 日 · UTC+8",
+        "en": "May 24 · UTC+8"
+      },
+      "title": {
+        "zh": "Tibo 确认重置或修复",
+        "en": "Tibo confirms a reset or fix"
+      },
+      "text": {
+        "zh": "官方明确提到 reset、fixed、back to normal 或 usage limits。",
+        "en": "Officially mentions reset, fixed, back to normal, or usage limits."
+      },
+      "quote": {
+        "zh": "推文信息：Some of you noticed limits drained faster in Codex, we root caused it to an optimization that we rolled back that had an impact on cache hit rates when compacting across long running sessions. We fixed this and have now reset usage limits for all accounts. Enjoy the weekend.",
+        "en": "Tweet info: Some of you noticed limits drained faster in Codex, we root caused it to an optimization that we rolled back that had an impact on cache hit rates when compacting across long running sessions. We fixed this and have now reset usage limits for all accounts. Enjoy the weekend."
+      },
+      "links": [
+        {
+          "label": "x.com/thsottiaux/status/2058280452851638313",
+          "url": "https://x.com/thsottiaux/status/2058280452851638313"
+        }
+      ]
+    },
+    {
+      "tag": "confirmed",
+      "time": "08:21",
+      "date": {
+        "zh": "5 月 23 日 · UTC+8",
+        "en": "May 23 · UTC+8"
+      },
+      "title": {
+        "zh": "Tibo 确认重置或修复",
+        "en": "Tibo confirms a reset or fix"
+      },
+      "text": {
+        "zh": "官方明确提到 reset、fixed、back to normal 或 usage limits。",
+        "en": "Officially mentions reset, fixed, back to normal, or usage limits."
+      },
+      "quote": {
+        "zh": "推文信息：Hars asked @sama and @thsottiaux to reset Codex usage limits. OK",
+        "en": "Tweet info: Hars asked @sama and @thsottiaux to reset Codex usage limits. OK"
+      },
+      "links": [
+        {
+          "label": "x.com/thsottiaux/status/2057980213854921096",
+          "url": "https://x.com/thsottiaux/status/2057980213854921096"
+        }
+      ]
+    }
+  ]
+}

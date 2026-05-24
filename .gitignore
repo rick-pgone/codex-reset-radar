@@ -1,0 +1,10 @@
+logs/
+dist/
+*.log
+.DS_Store
+node_modules/
+
+# Never commit local browser sessions or private credentials.
+*_cookies.json
+*.secret
+.env

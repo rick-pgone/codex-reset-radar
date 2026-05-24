@@ -1,0 +1,934 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Codex Reset Radar</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #060708;
+      --panel: #0d1214;
+      --panel-soft: #11191c;
+      --line: rgba(188, 211, 207, 0.18);
+      --line-strong: rgba(188, 211, 207, 0.34);
+      --text: #edf6f3;
+      --muted: #91a49f;
+      --dim: #63736f;
+      --cyan: #42f2d5;
+      --green: #61e58b;
+      --amber: #ffcb68;
+      --violet: #a98cff;
+      --red: #ff5b6e;
+      --shadow: rgba(0, 0, 0, 0.44);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        linear-gradient(rgba(255,255,255,0.024) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.024) 1px, transparent 1px),
+        radial-gradient(circle at 18% 0%, rgba(66, 242, 213, 0.13), transparent 32rem),
+        radial-gradient(circle at 82% 5%, rgba(255, 91, 110, 0.1), transparent 30rem),
+        var(--bg);
+      background-size: 42px 42px, 42px 42px, auto, auto, auto;
+      color: var(--text);
+      letter-spacing: 0;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    .shell {
+      width: min(1060px, 100%);
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 14px 0 22px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .mark {
+      width: 36px;
+      height: 36px;
+      position: relative;
+      border: 1px solid rgba(66, 242, 213, 0.52);
+      background: #071010;
+      box-shadow: 0 0 18px rgba(66, 242, 213, 0.16);
+      flex: none;
+    }
+
+    .mark::before,
+    .mark::after {
+      content: "";
+      position: absolute;
+      inset: 8px;
+      border: 1px solid rgba(255, 203, 104, 0.62);
+      transform: rotate(45deg);
+    }
+
+    .mark::after {
+      inset: 14px;
+      border-color: var(--red);
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 22px;
+      line-height: 1.1;
+      font-weight: 750;
+    }
+
+    .brand p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+
+    .lang-toggle {
+      display: inline-grid;
+      grid-template-columns: 1fr 1fr;
+      border: 1px solid var(--line);
+      background: rgba(11, 16, 18, 0.72);
+      padding: 3px;
+    }
+
+    .lang-toggle button {
+      appearance: none;
+      border: 0;
+      color: var(--muted);
+      background: transparent;
+      padding: 6px 9px;
+      font: inherit;
+      font-size: 12px;
+      font-weight: 740;
+      cursor: pointer;
+    }
+
+    .lang-toggle button.active {
+      color: var(--cyan);
+      background: rgba(66, 242, 213, 0.1);
+      box-shadow: inset 0 0 0 1px rgba(66, 242, 213, 0.28);
+    }
+
+    .sync {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border: 1px solid var(--line);
+      background: rgba(11, 16, 18, 0.72);
+      color: var(--muted);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .pulse {
+      width: 8px;
+      height: 8px;
+      background: var(--green);
+      box-shadow: 0 0 16px var(--green);
+      animation: pulse 1.8s ease-in-out infinite;
+      flex: none;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.5; transform: scale(0.86); }
+      50% { opacity: 1; transform: scale(1.04); }
+    }
+
+    .stack {
+      display: grid;
+      gap: 22px;
+      padding-top: 22px;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(16, 24, 27, 0.86), rgba(8, 12, 14, 0.9));
+      box-shadow: 0 22px 60px var(--shadow);
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .panel-title {
+      margin: 0;
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .hero {
+      padding: 30px 28px;
+      display: grid;
+      gap: 24px;
+    }
+
+    .hero-primary {
+      position: relative;
+      display: flex;
+      align-items: baseline;
+      gap: 18px;
+      width: fit-content;
+      max-width: 100%;
+      cursor: help;
+    }
+
+    .hero-primary::after {
+      content: attr(data-tip);
+      position: absolute;
+      left: 0;
+      top: calc(100% + 12px);
+      width: max-content;
+      max-width: min(360px, 78vw);
+      padding: 10px 12px;
+      border: 1px solid var(--line-strong);
+      background: #0a0f11;
+      color: #d7e5e1;
+      box-shadow: 0 16px 46px rgba(0, 0, 0, 0.55);
+      font-size: 12px;
+      line-height: 1.45;
+      opacity: 0;
+      transform: translateY(-4px);
+      pointer-events: none;
+      transition: opacity 150ms ease, transform 150ms ease;
+      z-index: 10;
+    }
+
+    .hero-primary:hover::after,
+    .hero-primary:focus-visible::after {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .hero-date-main {
+      margin: 0;
+      color: var(--green);
+      font-size: clamp(38px, 6.2vw, 76px);
+      line-height: 0.95;
+      font-weight: 800;
+      text-shadow: 0 0 26px rgba(97, 229, 139, 0.18);
+    }
+
+    .hero-primary.high-risk .hero-date-main {
+      color: var(--amber);
+      text-shadow: 0 0 26px rgba(255, 203, 104, 0.18);
+    }
+
+    .hero-status {
+      margin: 0;
+      color: var(--text);
+      font-size: clamp(28px, 4vw, 48px);
+      line-height: 1.08;
+      font-weight: 800;
+    }
+
+    .hero-summary {
+      display: grid;
+      gap: 8px;
+      max-width: 900px;
+    }
+
+    .hero-summary p {
+      margin: 0;
+      color: #c8d8d4;
+      font-size: 16px;
+      line-height: 1.55;
+    }
+
+    .tweet-source {
+      display: grid;
+      gap: 14px;
+      padding-top: 18px;
+      border-top: 1px solid var(--line);
+    }
+
+    .tweet-source-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+
+    .source {
+      display: grid;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .source small {
+      color: var(--cyan);
+      font-weight: 760;
+      text-transform: uppercase;
+      letter-spacing: 0.11em;
+    }
+
+    .source a {
+      width: fit-content;
+      max-width: 100%;
+      overflow-wrap: anywhere;
+      color: var(--text);
+      font-size: 14px;
+      border-bottom: 1px solid rgba(66, 242, 213, 0.55);
+    }
+
+    .tweet-text {
+      margin: 0;
+      color: #c8d8d4;
+      font-size: 16px;
+      line-height: 1.55;
+      max-width: 920px;
+      padding-left: 14px;
+      border-left: 2px solid rgba(66, 242, 213, 0.42);
+    }
+
+    .tweet-text strong {
+      color: var(--amber);
+      font-weight: 760;
+    }
+
+    .tag {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 82px;
+      padding: 7px 10px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.04);
+      font-size: 12px;
+      font-weight: 760;
+      cursor: help;
+      white-space: nowrap;
+    }
+
+    .tag.confirmed { color: var(--green); border-color: rgba(97, 229, 139, 0.52); }
+    .tag.high { color: var(--amber); border-color: rgba(255, 203, 104, 0.56); }
+    .tag.joke { color: var(--violet); border-color: rgba(169, 140, 255, 0.54); }
+    .tag.signal { color: var(--cyan); border-color: rgba(66, 242, 213, 0.48); }
+
+    .tag::after {
+      content: attr(data-tip);
+      position: absolute;
+      right: 0;
+      bottom: calc(100% + 10px);
+      width: min(280px, 76vw);
+      padding: 11px 12px;
+      border: 1px solid var(--line-strong);
+      background: #0a0f11;
+      color: #d7e5e1;
+      box-shadow: 0 16px 46px rgba(0, 0, 0, 0.55);
+      font-size: 12px;
+      line-height: 1.45;
+      text-align: left;
+      white-space: normal;
+      opacity: 0;
+      transform: translateY(4px);
+      pointer-events: none;
+      transition: opacity 150ms ease, transform 150ms ease;
+      z-index: 10;
+    }
+
+    .tag:hover::after,
+    .tag:focus-visible::after {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .analysis {
+      padding: 22px;
+      display: grid;
+      gap: 18px;
+    }
+
+    .analysis p {
+      margin: 0;
+      color: #c8d8d4;
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--line);
+      border-top: 1px solid var(--line);
+    }
+
+    .metric {
+      min-height: 118px;
+      padding: 18px;
+      background: rgba(8, 12, 14, 0.95);
+    }
+
+    .metric b {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 17px;
+    }
+
+    .metric span {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .event-list {
+      display: grid;
+    }
+
+    .event {
+      display: grid;
+      grid-template-columns: minmax(180px, 240px) minmax(0, 1fr) auto;
+      gap: 20px;
+      align-items: start;
+      padding: 22px 20px;
+      border-top: 1px solid var(--line);
+    }
+
+    .event:first-child {
+      border-top: 0;
+    }
+
+    .event-time {
+      color: var(--green);
+      font-size: clamp(28px, 5vw, 52px);
+      line-height: 0.92;
+      font-weight: 800;
+    }
+
+    .event-time span {
+      display: block;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.25;
+      font-weight: 650;
+    }
+
+    .event h3 {
+      margin: 0 0 8px;
+      font-size: 18px;
+      font-weight: 720;
+    }
+
+    .event p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .event-quote {
+      margin-top: 10px;
+      color: #c8d8d4;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .event-source {
+      display: inline-block;
+      width: fit-content;
+      max-width: 100%;
+      margin-top: 12px;
+      color: #dce9e6;
+      font-size: 13px;
+      overflow-wrap: anywhere;
+      border-bottom: 1px solid rgba(66, 242, 213, 0.48);
+    }
+
+    @media (max-width: 760px) {
+      .shell { padding: 16px; }
+
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .top-actions {
+        justify-content: flex-start;
+      }
+
+      .hero {
+        padding: 22px;
+      }
+
+      .hero-primary {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .tweet-text {
+        font-size: 17px;
+      }
+
+      .metric-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .event {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      .event .tag {
+        width: fit-content;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="mark" aria-hidden="true"></div>
+        <div>
+          <h1 data-i18n="brandTitle">Codex 重置雷达</h1>
+          <p data-i18n="brandSubtitle">监测 Codex 额度异常、官方回应与重置证据。</p>
+        </div>
+      </div>
+      <div class="top-actions">
+        <div class="lang-toggle" aria-label="Language">
+          <button type="button" data-lang-button="zh">中</button>
+          <button type="button" data-lang-button="en">EN</button>
+        </div>
+        <div class="sync"><span class="pulse"></span><span data-i18n="lastScan">上次扫描：2026 年 5 月 24 日 · 每 12 小时</span></div>
+      </div>
+    </header>
+
+    <section class="stack" aria-label="Codex reset monitoring dashboard">
+      <section class="panel">
+        <div class="panel-head">
+          <p class="panel-title" data-i18n="latestEvidence">最新证据</p>
+          <span class="tag confirmed" tabindex="0" data-tag="confirmed" data-i18n="confirmed">确信</span>
+        </div>
+        <div class="hero">
+          <div class="hero-primary" tabindex="0" data-i18n-tip="tweetFullTime">
+            <p class="hero-date-main" data-i18n="tweetDateShort">5 月 24 日</p>
+            <h2 class="hero-status" data-i18n="heroConclusion">已重置额度</h2>
+          </div>
+          <div class="hero-summary">
+            <p data-i18n="heroConclusionText">官方已确认修复，并重置所有账号的使用额度；当前不是预测信号，而是已发生的重置事件。</p>
+          </div>
+          <div class="tweet-source">
+            <div class="tweet-source-head">
+              <div class="source">
+                <small data-i18n="tweetSourceTitle">推特来源 · Tibo</small>
+                <a href="https://x.com/thsottiaux/status/2058280452851638313" target="_blank" rel="noreferrer">
+                  x.com/thsottiaux/status/2058280452851638313
+                </a>
+              </div>
+              <span class="tag signal" tabindex="0" data-tag="official" data-i18n="official">官方</span>
+            </div>
+            <p class="tweet-text" data-i18n-html="tweetText">
+              一些用户注意到 Codex 的额度消耗速度更快。我们定位到原因：之前回滚的一项优化，在长时间运行会话的压缩过程中影响了缓存命中率。<br><br>我们已经修复，并且已经<strong>重置所有账号的使用额度</strong>。周末愉快。
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <p class="panel-title" data-i18n="analysisConclusion">分析结论</p>
+          <span class="tag confirmed" tabindex="0" data-tag="confirmed" data-i18n="highConfidence">高置信度</span>
+        </div>
+        <div class="analysis">
+          <p data-i18n="analysisText">
+            这是一次已确认的重置事件。最强的模式不是普通用户要求更多额度，而是系统侧异常：Codex 额度消耗速度异常、使用额度不同步，或后端优化影响了计费/额度统计。当 Tibo 或 Sama 承认正在调查或说明根因时，重置概率会明显上升。
+          </p>
+        </div>
+        <div class="metric-grid">
+          <div class="metric">
+            <b data-i18n="triggerTitle">触发原因</b>
+            <span data-i18n="triggerText">多个用户反馈 Codex 额度消耗速度明显快于正常情况。</span>
+          </div>
+          <div class="metric">
+            <b data-i18n="officialResponseTitle">官方回应</b>
+            <span data-i18n="officialResponseText">Tibo 指出问题来自一项已回滚的优化，该优化影响了缓存命中率。</span>
+          </div>
+          <div class="metric">
+            <b data-i18n="outcomeTitle">结果</b>
+            <span data-i18n="outcomeText">修复后，所有账号的使用额度被重置。</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <p class="panel-title" data-i18n="evidenceChain">证据链</p>
+          <span class="tag high" tabindex="0" data-tag="high" data-i18n="sevenDayWindow">近 7 天</span>
+        </div>
+        <div class="event-list">
+          <article class="event">
+            <div class="event-time">04:14<span data-i18n="event1Date">5 月 24 日 · UTC+8</span></div>
+            <div>
+              <h3 data-i18n="event1Title">Tibo 确认所有账号已重置</h3>
+              <p data-i18n="event1Text">明确说明额度消耗更快、根因已找到、修复已上线，并且使用额度已重置。</p>
+              <p class="event-quote" data-i18n="event1Quote">推文信息：Tibo 提到 Codex 额度消耗变快，原因是一项回滚优化影响了长会话压缩时的缓存命中率；修复后已重置所有账号的使用额度。</p>
+              <a class="event-source" href="https://x.com/thsottiaux/status/2058280452851638313" target="_blank" rel="noreferrer">x.com/thsottiaux/status/2058280452851638313</a>
+            </div>
+            <span class="tag confirmed" tabindex="0" data-tag="confirmed" data-i18n="confirmed">确信</span>
+          </article>
+          <article class="event">
+            <div class="event-time">08:21<span data-i18n="event2Date">5 月 23 日 · UTC+8</span></div>
+            <div>
+              <h3 data-i18n="event2Title">Tibo 对重置请求回复“OK”</h3>
+              <p data-i18n="event2Text">上下文：Hars 请求 @sama 和 @thsottiaux 重置。这是较弱但有意义的确认信号。</p>
+              <p class="event-quote" data-i18n="event2Quote">推文信息：Hars 明确请求 @sama 和 @thsottiaux “reset”；Tibo 在同一对话链中回复 “OK”，需要结合上下文理解。</p>
+              <a class="event-source" href="https://x.com/thsottiaux/status/2057980213854921096" target="_blank" rel="noreferrer">Tibo reply: x.com/thsottiaux/status/2057980213854921096</a>
+              <a class="event-source" href="https://x.com/harsette/status/2057977520201556449" target="_blank" rel="noreferrer">User context: x.com/harsette/status/2057977520201556449</a>
+            </div>
+            <span class="tag high" tabindex="0" data-tag="high" data-i18n="highRisk">高危</span>
+          </article>
+          <article class="event">
+            <div class="event-time">02:31<span data-i18n="event3Date">5 月 20 日 · UTC+8</span></div>
+            <div>
+              <h3 data-i18n="event3Title">Sama 开玩笑说 Tibo 会重置 Codex 限制</h3>
+              <p data-i18n="event3Text">这是有用信号，但没有后续证据时不能视为重置确认。</p>
+              <p class="event-quote" data-i18n="event3Quote">推文信息：Sama 用玩笑方式把 Codex rate limits reset 和 Tibo 关联起来，属于弱信号，必须等待 Tibo 或后续官方确认。</p>
+              <a class="event-source" href="https://x.com/sama/status/2056804900017947046" target="_blank" rel="noreferrer">x.com/sama/status/2056804900017947046</a>
+            </div>
+            <span class="tag joke" tabindex="0" data-tag="joke" data-i18n="joke">玩笑</span>
+          </article>
+          <article class="event">
+            <div class="event-time">06:47<span data-i18n="event4Date">5 月 18 日 · UTC+8</span></div>
+            <div>
+              <h3 data-i18n="event4Title">Tibo 表示使用限制已恢复正常</h3>
+              <p data-i18n="event4Text">早前事件：部分 Codex 订阅用户的使用限制出现不同步。</p>
+              <p class="event-quote" data-i18n="event4Quote">推文信息：Tibo 表示使用限制已经恢复正常；此前他提到部分 Codex 订阅用户的限制存在不同步问题。</p>
+              <a class="event-source" href="https://x.com/thsottiaux/status/2056144502088437799" target="_blank" rel="noreferrer">Fix confirmation: x.com/thsottiaux/status/2056144502088437799</a>
+              <a class="event-source" href="https://x.com/thsottiaux/status/2056109929048764895" target="_blank" rel="noreferrer">Prior context: x.com/thsottiaux/status/2056109929048764895</a>
+            </div>
+            <span class="tag confirmed" tabindex="0" data-tag="confirmed" data-i18n="confirmed">确信</span>
+          </article>
+        </div>
+      </section>
+
+    </section>
+  </main>
+
+  <script>
+    const translations = {
+      en: {
+        brandTitle: "Codex Reset Radar",
+        brandSubtitle: "Signal monitor for Codex usage limit anomalies and reset evidence.",
+        lastScan: "Last scan: May 24, 2026 · 12h cadence",
+        latestEvidence: "Latest Evidence",
+        resetConfirmed: "Reset Confirmed",
+        officialSignal: "Official signal · Tibo",
+        heroConclusion: "Usage limits reset",
+        heroConclusionText: "Official fix confirmed, with usage limits reset for all accounts. This is not a forecast signal; it is a completed reset event.",
+        tweetSourceTitle: "Tweet source · Tibo",
+        tweetDateShort: "May 24",
+        tweetFullTime: "May 24, 2026 · 04:14 · UTC+8",
+        tweetText: "Some of you noticed limits drained faster in Codex, we root caused it to an optimization that we rolled back that had an impact on cache hit rates when compacting across long running sessions.<br><br>We fixed this and have now <strong>reset usage limits for all accounts</strong>. Enjoy the weekend.",
+        confirmed: "Confirmed",
+        official: "Official",
+        highConfidence: "High confidence",
+        analysisConclusion: "Analysis Conclusion",
+        analysisText: "This is a confirmed reset event. The strongest pattern is not ordinary users asking for more quota; it is a system-side anomaly where Codex limits drain faster than expected, usage limits go out of sync, or a backend optimization affects accounting. When Tibo or Sama acknowledges investigation or root cause, the reset likelihood rises sharply.",
+        triggerTitle: "Trigger",
+        triggerText: "Multiple users reported Codex limits draining faster than normal.",
+        officialResponseTitle: "Official response",
+        officialResponseText: "Tibo identified a rolled-back optimization affecting cache hit rates.",
+        outcomeTitle: "Outcome",
+        outcomeText: "Usage limits were reset for all accounts after the fix.",
+        evidenceChain: "Evidence Chain",
+        sevenDayWindow: "7-day window",
+        event1Date: "May 24 · UTC+8",
+        event1Title: "Tibo confirms reset for all accounts",
+        event1Text: "Explicitly says limits drained faster, root cause was found, fix was shipped, and usage limits were reset.",
+        event1Quote: "Tweet info: Tibo says Codex limits drained faster because a rolled-back optimization affected cache hit rates during long-session compaction; after the fix, usage limits were reset for all accounts.",
+        event2Date: "May 23 · UTC+8",
+        event2Title: "Tibo replies “OK” to a reset request",
+        event2Text: "Context: Hars asked @sama and @thsottiaux to reset. This is a weak but meaningful confirmation signal.",
+        event2Quote: "Tweet info: Hars explicitly asked @sama and @thsottiaux to “reset”; Tibo replied “OK” in the same thread, so the reply only makes sense with the context attached.",
+        event3Date: "May 20 · UTC+8",
+        event3Title: "Sama jokes that Tibo will reset Codex rate limits",
+        event3Text: "Useful signal, but not a reset confirmation without follow-up evidence.",
+        event3Quote: "Tweet info: Sama jokingly links a Codex rate-limit reset to Tibo. This is a weak signal until Tibo or another official follow-up confirms action.",
+        event4Date: "May 18 · UTC+8",
+        event4Title: "Tibo says usage limits are back to normal",
+        event4Text: "Earlier incident: usage limits were out of sync for some Codex subscription users.",
+        event4Quote: "Tweet info: Tibo says usage limits are back to normal; earlier he had mentioned an out-of-sync limit issue for some Codex subscription users.",
+        highRisk: "High Risk",
+        joke: "Joke",
+        queryStrategy: "Query Strategy",
+        every12h: "Every 12h",
+        queryOfficialText: "Search for reset, usage limits, rate limits, drained, out of sync, fixed, investigating.",
+        priority: "Priority",
+        users: "Users",
+        queryUsersText: "Detect clusters of complaints and replies, then promote only when official response appears.",
+        signal: "Signal",
+        tipConfirmed: "Official says reset, fixed, back to normal, waived usage, or reset usage limits.",
+        tipHigh: "Tibo/Sama acknowledges investigation, or many users report out-of-sync or faster-than-normal drain.",
+        tipJoke: "Sama or users mention reset in a meme context without a concrete operational claim.",
+        tipOfficial: "This item comes from an official or tracked source and should be prioritized."
+      },
+      zh: {
+        brandTitle: "Codex 重置雷达",
+        brandSubtitle: "监测 Codex 额度异常、官方回应与重置证据。",
+        lastScan: "上次扫描：2026 年 5 月 24 日 · 每 12 小时",
+        latestEvidence: "最新证据",
+        resetConfirmed: "已确认重置",
+        officialSignal: "官方信号 · Tibo",
+        heroConclusion: "已重置额度",
+        heroConclusionText: "官方已确认修复，并重置所有账号的使用额度；当前不是预测信号，而是已发生的重置事件。",
+        tweetSourceTitle: "推特来源 · Tibo",
+        tweetDateShort: "5 月 24 日",
+        tweetFullTime: "2026 年 5 月 24 日 · 04:14 · UTC+8",
+        tweetText: "一些用户注意到 Codex 的额度消耗速度更快。我们定位到原因：之前回滚的一项优化，在长时间运行会话的压缩过程中影响了缓存命中率。<br><br>我们已经修复，并且已经<strong>重置所有账号的使用额度</strong>。周末愉快。",
+        confirmed: "确信",
+        official: "官方",
+        highConfidence: "高置信度",
+        analysisConclusion: "分析结论",
+        analysisText: "这是一次已确认的重置事件。最强的模式不是普通用户要求更多额度，而是系统侧异常：Codex 额度消耗速度异常、使用额度不同步，或后端优化影响了计费/额度统计。当 Tibo 或 Sama 承认正在调查或说明根因时，重置概率会明显上升。",
+        triggerTitle: "触发原因",
+        triggerText: "多个用户反馈 Codex 额度消耗速度明显快于正常情况。",
+        officialResponseTitle: "官方回应",
+        officialResponseText: "Tibo 指出问题来自一项已回滚的优化，该优化影响了缓存命中率。",
+        outcomeTitle: "结果",
+        outcomeText: "修复后，所有账号的使用额度被重置。",
+        evidenceChain: "证据链",
+        sevenDayWindow: "近 7 天",
+        event1Date: "5 月 24 日 · UTC+8",
+        event1Title: "Tibo 确认所有账号已重置",
+        event1Text: "明确说明额度消耗更快、根因已找到、修复已上线，并且使用额度已重置。",
+        event1Quote: "推文信息：Tibo 提到 Codex 额度消耗变快，原因是一项回滚优化影响了长会话压缩时的缓存命中率；修复后已重置所有账号的使用额度。",
+        event2Date: "5 月 23 日 · UTC+8",
+        event2Title: "Tibo 对重置请求回复“OK”",
+        event2Text: "上下文：Hars 请求 @sama 和 @thsottiaux 重置。这是较弱但有意义的确认信号。",
+        event2Quote: "推文信息：Hars 明确请求 @sama 和 @thsottiaux “reset”；Tibo 在同一对话链中回复 “OK”，需要结合上下文理解。",
+        event3Date: "5 月 20 日 · UTC+8",
+        event3Title: "Sama 开玩笑说 Tibo 会重置 Codex 限制",
+        event3Text: "这是有用信号，但没有后续证据时不能视为重置确认。",
+        event3Quote: "推文信息：Sama 用玩笑方式把 Codex rate limits reset 和 Tibo 关联起来，属于弱信号，必须等待 Tibo 或后续官方确认。",
+        event4Date: "5 月 18 日 · UTC+8",
+        event4Title: "Tibo 表示使用限制已恢复正常",
+        event4Text: "早前事件：部分 Codex 订阅用户的使用限制出现不同步。",
+        event4Quote: "推文信息：Tibo 表示使用限制已经恢复正常；此前他提到部分 Codex 订阅用户的限制存在不同步问题。",
+        highRisk: "高危",
+        joke: "玩笑",
+        queryStrategy: "查询策略",
+        every12h: "每 12 小时",
+        queryOfficialText: "搜索 reset、usage limits、rate limits、drained、out of sync、fixed、investigating 等关键词。",
+        priority: "优先",
+        users: "用户",
+        queryUsersText: "检测用户反馈和回复聚集；只有出现官方回应时才提升等级。",
+        signal: "信号",
+        tipConfirmed: "官方明确说已重置、已修复、恢复正常、免除用量，或重置使用额度。",
+        tipHigh: "Tibo/Sama 承认正在调查，或大量用户反馈不同步、异常快速消耗。",
+        tipJoke: "Sama 或用户以玩笑方式提到 reset，但没有具体操作声明。",
+        tipOfficial: "该项来自官方或重点追踪账号，应优先关注。"
+      }
+    };
+
+    const tagTipMap = {
+      confirmed: "tipConfirmed",
+      high: "tipHigh",
+      joke: "tipJoke",
+      official: "tipOfficial"
+    };
+
+    let currentLanguage = localStorage.getItem("codex-reset-radar-language") || "zh";
+    let radarData = null;
+
+    function localized(value, lang = currentLanguage) {
+      if (!value || typeof value !== "object") return value || "";
+      return value[lang] || value.zh || value.en || "";
+    }
+
+    function setTag(node, tag, lang = currentLanguage) {
+      if (!node) return;
+      const tagKey = tag === "high" ? "highRisk" : tag === "joke" ? "joke" : "confirmed";
+      node.className = `tag ${tag === "high" ? "high" : tag === "joke" ? "joke" : "confirmed"}`;
+      node.dataset.tag = tag;
+      node.textContent = localized(translations[lang][tagKey], lang) || translations[lang][tagKey];
+      const tipKey = tagTipMap[tag];
+      if (tipKey && translations[lang][tipKey]) node.setAttribute("data-tip", translations[lang][tipKey]);
+    }
+
+    function updateLastScan(data, lang = currentLanguage) {
+      const node = document.querySelector(".sync span[data-i18n='lastScan']");
+      if (!node || !data.generated_at) return;
+      const date = new Date(data.generated_at);
+      const cadence = data.cadence_hours || 12;
+      if (Number.isNaN(date.getTime())) return;
+      if (lang === "zh") {
+        node.textContent = `上次扫描：${date.getFullYear()} 年 ${date.getMonth() + 1} 月 ${date.getDate()} 日 · 每 ${cadence} 小时`;
+      } else {
+        node.textContent = `Last scan: ${date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })} · ${cadence}h cadence`;
+      }
+    }
+
+    function renderLatest(data, lang = currentLanguage) {
+      if (!data?.latest) return;
+      const latest = data.latest;
+      const latestPanel = document.querySelector(".stack > .panel");
+      setTag(latestPanel?.querySelector(".panel-head .tag"), latest.tag, lang);
+
+      const primary = document.querySelector(".hero-primary");
+      if (primary) {
+        primary.classList.toggle("high-risk", latest.tag === "high");
+        primary.setAttribute("data-tip", localized(latest.full_time, lang));
+      }
+      const dateNode = document.querySelector(".hero-date-main");
+      if (dateNode) dateNode.textContent = localized(latest.date_short, lang);
+      const statusNode = document.querySelector(".hero-status");
+      if (statusNode) statusNode.textContent = localized(latest.conclusion, lang);
+      const summaryNode = document.querySelector(".hero-summary p");
+      if (summaryNode) summaryNode.textContent = localized(latest.summary, lang);
+      const sourceTitle = document.querySelector(".tweet-source .source small");
+      if (sourceTitle) sourceTitle.textContent = localized(latest.source_title, lang);
+      const sourceLink = document.querySelector(".tweet-source .source a");
+      if (sourceLink) {
+        sourceLink.href = latest.url;
+        sourceLink.textContent = latest.url.replace(/^https?:\/\//, "");
+      }
+      const tweetText = document.querySelector(".tweet-text");
+      if (tweetText) tweetText.innerHTML = localized(latest.tweet_html, lang);
+    }
+
+    function renderAnalysis(data, lang = currentLanguage) {
+      if (!data?.analysis) return;
+      const analysisText = document.querySelector(".analysis p");
+      if (analysisText) analysisText.textContent = localized(data.analysis.text, lang);
+      const metrics = document.querySelectorAll(".metric-grid .metric");
+      (data.analysis.metrics || []).slice(0, metrics.length).forEach((metric, index) => {
+        const title = metrics[index].querySelector("b");
+        const text = metrics[index].querySelector("span");
+        if (title) title.textContent = localized(metric.title, lang);
+        if (text) text.textContent = localized(metric.text, lang);
+      });
+    }
+
+    function renderEvidence(data, lang = currentLanguage) {
+      const list = document.querySelector(".event-list");
+      if (!list || !Array.isArray(data?.evidence)) return;
+      list.innerHTML = "";
+      data.evidence.forEach((item) => {
+        const article = document.createElement("article");
+        article.className = "event";
+
+        const time = document.createElement("div");
+        time.className = "event-time";
+        time.textContent = item.time || "";
+        const date = document.createElement("span");
+        date.textContent = localized(item.date, lang);
+        time.appendChild(date);
+
+        const body = document.createElement("div");
+        const title = document.createElement("h3");
+        title.textContent = localized(item.title, lang);
+        const text = document.createElement("p");
+        text.textContent = localized(item.text, lang);
+        const quote = document.createElement("p");
+        quote.className = "event-quote";
+        quote.textContent = localized(item.quote, lang);
+        body.append(title, text, quote);
+        (item.links || []).forEach((link) => {
+          const anchor = document.createElement("a");
+          anchor.className = "event-source";
+          anchor.href = link.url;
+          anchor.target = "_blank";
+          anchor.rel = "noreferrer";
+          anchor.textContent = link.label || link.url.replace(/^https?:\/\//, "");
+          body.appendChild(anchor);
+        });
+
+        const tag = document.createElement("span");
+        tag.tabIndex = 0;
+        setTag(tag, item.tag, lang);
+        article.append(time, body, tag);
+        list.appendChild(article);
+      });
+    }
+
+    function renderRadarData(lang = currentLanguage) {
+      if (!radarData) return;
+      updateLastScan(radarData, lang);
+      renderLatest(radarData, lang);
+      renderAnalysis(radarData, lang);
+      renderEvidence(radarData, lang);
+    }
+
+    function applyLanguage(lang) {
+      currentLanguage = lang;
+      const dict = translations[lang] || translations.zh;
+      document.documentElement.lang = lang === "zh" ? "zh-CN" : "en";
+      document.querySelectorAll("[data-i18n]").forEach((node) => {
+        const key = node.getAttribute("data-i18n");
+        if (dict[key]) node.textContent = dict[key];
+      });
+      document.querySelectorAll("[data-i18n-html]").forEach((node) => {
+        const key = node.getAttribute("data-i18n-html");
+        if (dict[key]) node.innerHTML = dict[key];
+      });
+      document.querySelectorAll("[data-i18n-tip]").forEach((node) => {
+        const key = node.getAttribute("data-i18n-tip");
+        if (dict[key]) node.setAttribute("data-tip", dict[key]);
+      });
+      document.querySelectorAll("[data-tag]").forEach((node) => {
+        const tipKey = tagTipMap[node.dataset.tag];
+        if (tipKey && dict[tipKey]) node.setAttribute("data-tip", dict[tipKey]);
+      });
+      document.querySelectorAll("[data-lang-button]").forEach((button) => {
+        button.classList.toggle("active", button.dataset.langButton === lang);
+      });
+      localStorage.setItem("codex-reset-radar-language", lang);
+      renderRadarData(lang);
+    }
+
+    applyLanguage(currentLanguage);
+
+    document.querySelectorAll("[data-lang-button]").forEach((button) => {
+      button.addEventListener("click", () => applyLanguage(button.dataset.langButton));
+    });
+
+    fetch("data/latest.json", { cache: "no-store" })
+      .then((response) => response.ok ? response.json() : null)
+      .then((data) => {
+        if (!data) return;
+        radarData = data;
+        renderRadarData(currentLanguage);
+      })
+      .catch(() => {});
+  </script>
+</body>
+</html>
