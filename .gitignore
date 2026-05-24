@@ -5,6 +5,7 @@ dist/
 node_modules/
 __pycache__/
 *.pyc
+.wrangler/
 
 # Never commit local browser sessions or private credentials.
 *_cookies.json
