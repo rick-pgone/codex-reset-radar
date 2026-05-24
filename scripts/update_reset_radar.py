@@ -82,16 +82,49 @@ def has_x_session(cookies: list[dict]) -> bool:
     return bool(values.get("auth_token") and values.get("ct0"))
 
 
-async def refresh_x_cookies(cookie_file: Path, chrome_profile_dir: Path, timeout_sec: int) -> None:
+async def import_chrome_cookies_via_cdp(cookie_file: Path, cdp_url: str) -> None:
+    cookie_file.parent.mkdir(parents=True, exist_ok=True)
+    async with async_playwright() as p:
+        browser = await p.chromium.connect_over_cdp(cdp_url)
+        cookies = []
+        for context in browser.contexts:
+            cookies.extend(await context.cookies())
+        await browser.close()
+
+    cookies = [
+        cookie
+        for cookie in cookies
+        if cookie.get("domain", "").endswith("x.com")
+        or cookie.get("domain", "").endswith("twitter.com")
+    ]
+    if not has_x_session(cookies):
+        names = ", ".join(sorted({cookie["name"] for cookie in cookies}))
+        raise RuntimeError(f"Could not find auth_token and ct0 from Chrome CDP cookies. Found: {names}")
+
+    cookie_file.write_text(json.dumps(cookies, ensure_ascii=False, indent=2), encoding="utf-8")
+    os.chmod(cookie_file, 0o600)
+    print(f"Imported {len(cookies)} X cookies from local Google Chrome CDP into {cookie_file}")
+
+
+async def refresh_x_cookies(
+    cookie_file: Path,
+    chrome_profile_dir: Path,
+    chrome_profile_name: str | None,
+    timeout_sec: int,
+) -> None:
     cookie_file.parent.mkdir(parents=True, exist_ok=True)
     chrome_profile_dir.mkdir(parents=True, exist_ok=True)
     async with async_playwright() as p:
+        chrome_args = ["--start-maximized"]
+        if chrome_profile_name:
+            chrome_args.append(f"--profile-directory={chrome_profile_name}")
+
         context = await p.chromium.launch_persistent_context(
             user_data_dir=str(chrome_profile_dir),
             channel="chrome",
             headless=False,
             no_viewport=True,
-            args=["--start-maximized"],
+            args=chrome_args,
         )
         cookies = load_playwright_cookies(cookie_file)
         if cookies:
@@ -375,19 +408,26 @@ async def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--cookie-file", type=Path, default=DEFAULT_COOKIE_FILE)
     parser.add_argument("--chrome-profile-dir", type=Path, default=DEFAULT_CHROME_PROFILE)
+    parser.add_argument("--chrome-profile-name")
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--hours", type=int, default=24 * 7)
     parser.add_argument("--count", type=int, default=40)
     parser.add_argument("--cadence-hours", type=int, default=12)
     parser.add_argument("--refresh-login", action="store_true")
+    parser.add_argument("--import-chrome-cdp", action="store_true")
+    parser.add_argument("--chrome-cdp-url", default="http://127.0.0.1:9222")
     parser.add_argument("--login-timeout-sec", type=int, default=300)
     parser.add_argument("--seed-only", action="store_true")
     args = parser.parse_args()
+
+    if args.import_chrome_cdp:
+        await import_chrome_cookies_via_cdp(args.cookie_file.expanduser(), args.chrome_cdp_url)
 
     if args.refresh_login:
         await refresh_x_cookies(
             args.cookie_file.expanduser(),
             args.chrome_profile_dir.expanduser(),
+            args.chrome_profile_name,
             args.login_timeout_sec,
         )
 
