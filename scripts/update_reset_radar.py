@@ -109,22 +109,27 @@ async def import_chrome_cookies_via_cdp(cookie_file: Path, cdp_url: str) -> None
 async def refresh_x_cookies(
     cookie_file: Path,
     chrome_profile_dir: Path,
-    chrome_profile_name: str | None,
     timeout_sec: int,
 ) -> None:
     cookie_file.parent.mkdir(parents=True, exist_ok=True)
     chrome_profile_dir.mkdir(parents=True, exist_ok=True)
+    real_chrome_root = Path.home() / "Library" / "Application Support" / "Google" / "Chrome"
+    try:
+        chrome_profile_dir.resolve().relative_to(real_chrome_root.resolve())
+    except ValueError:
+        pass
+    else:
+        raise RuntimeError(
+            "Refusing to automate the real Google Chrome profile. "
+            "Use the dedicated profile under /Users/rick/登录态/x_chrome_profile instead."
+        )
     async with async_playwright() as p:
-        chrome_args = ["--start-maximized"]
-        if chrome_profile_name:
-            chrome_args.append(f"--profile-directory={chrome_profile_name}")
-
         context = await p.chromium.launch_persistent_context(
             user_data_dir=str(chrome_profile_dir),
             channel="chrome",
             headless=False,
             no_viewport=True,
-            args=chrome_args,
+            args=["--start-maximized"],
         )
         cookies = load_playwright_cookies(cookie_file)
         if cookies:
@@ -408,7 +413,6 @@ async def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--cookie-file", type=Path, default=DEFAULT_COOKIE_FILE)
     parser.add_argument("--chrome-profile-dir", type=Path, default=DEFAULT_CHROME_PROFILE)
-    parser.add_argument("--chrome-profile-name")
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--hours", type=int, default=24 * 7)
     parser.add_argument("--count", type=int, default=40)
@@ -427,7 +431,6 @@ async def main() -> None:
         await refresh_x_cookies(
             args.cookie_file.expanduser(),
             args.chrome_profile_dir.expanduser(),
-            args.chrome_profile_name,
             args.login_timeout_sec,
         )
 

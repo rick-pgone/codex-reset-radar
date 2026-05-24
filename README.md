@@ -15,20 +15,11 @@
 
 本项目使用本地 X 登录态，不使用 X 官方 API。
 
-如果 kobe 的本地 Google Chrome 已经登录 X，优先使用 Chrome CDP 导出当前会话 cookie：
-
-```bash
-./scripts/import_kobe_chrome_session.sh
-```
-
-这个方式不会直接读取 Chrome 的加密 cookie 数据库，而是临时用 remote debugging 端口让 Chrome 自己导出当前会话。
-
-如果 CDP 导出失败，再刷新一次登录 cookie：
+先刷新一次登录 cookie。脚本会打开一个专用 Google Chrome profile，不会接管你日常使用的 kobe Chrome：
 
 ```bash
 /opt/homebrew/bin/python3.11 scripts/update_reset_radar.py \
   --refresh-login \
-  --chrome-profile-dir "$HOME/Library/Application Support/Google/Chrome/Profile 1" \
   --cadence-hours 12
 ```
 
