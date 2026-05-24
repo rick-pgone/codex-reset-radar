@@ -73,7 +73,7 @@ launchctl unload ~/Library/LaunchAgents/com.rick.codex-reset-radar.plist
 ./scripts/install_launchd.sh
 ```
 
-## 推荐上线方式
+## 推荐上线方式：前端云端静态托管，本地采集数据
 
 推荐：Cloudflare Pages + Cloudflare Registrar。
 
@@ -82,6 +82,7 @@ launchctl unload ~/Library/LaunchAgents/com.rick.codex-reset-radar.plist
 - 前端是纯静态页面，Cloudflare Pages 免费额度足够。
 - 域名、DNS、Pages 自定义域名都在 Cloudflare 一个地方管理。
 - 本地脚本每 12 小时更新 `data/latest.json` 后，只要提交到 GitHub，Cloudflare Pages 会自动重新部署。
+- 不需要买 VPS。采集任务继续在你的本地电脑跑，云端只负责托管前端页面。
 
 ### 上线流程
 
@@ -115,9 +116,9 @@ git push
 
 当前目录还不是 git 仓库。等你确定 GitHub 仓库地址后，再把自动提交/推送加进定时任务。
 
-## 云服务器方案
+## 可选：真正的 VPS 方案
 
-如果要把采集任务也放到云服务器，推荐低配 Ubuntu VPS：
+一般不需要 VPS。如果以后想把采集任务也放到云服务器，再考虑低配 Ubuntu VPS：
 
 - 性价比优先：Hetzner CX22 / ARM 低配，约 4-5 美元/月，适合欧洲/美国访问。
 - 更容易购买和管理：DigitalOcean Basic Droplet，官方页面显示 Droplet 起步价约 4 美元/月，常见 1GB 档约 6 美元/月。
